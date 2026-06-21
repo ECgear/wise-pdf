@@ -1,0 +1,43 @@
+wise pdf
+Copyright (c) 2026 ECgear
+Licensed under the MIT License (see LICENSE).
+
+================================================================================
+Licensing & credits
+================================================================================
+
+wise pdf is a 100% client-side (in-browser) PDF tool. Files are never uploaded;
+all processing runs locally via WebAssembly. wise pdf does NOT include or
+redistribute the source code of any of the libraries below — they are consumed
+as npm dependencies (downloaded by the end user / bundled by the consuming app)
+and are not vendored into this repository.
+
+Runtime dependencies:
+
+  - pdfjs-dist      Apache-2.0      https://github.com/mozilla/pdf.js
+      Mozilla's PDF parser/renderer. Used to decode PDFs, render pages to a
+      canvas at a chosen DPI, and read embedded image XObjects.
+  - pdf-lib         MIT             https://github.com/Hopding/pdf-lib
+      Used to build PDFs from images and to replace image streams in place.
+  - @jsquash/jpeg   Apache-2.0      https://github.com/jamsinclair/jSquash
+      WebAssembly build of mozjpeg (the codec itself is BSD-3-Clause). Used to
+      re-encode images to JPEG at higher quality-per-byte than canvas.toBlob.
+  - @jsquash/oxipng Apache-2.0      https://github.com/jamsinclair/jSquash
+      WebAssembly build of oxipng (MIT/Apache-2.0). Used for lossless PNG output.
+  - fflate          MIT             https://github.com/101arrowz/fflate
+      Store-only ZIP packaging for multi-page "PDF to JPG" export.
+
+Codec licensing of the paths wise pdf actually uses:
+
+  - JPEG (re-encode)   : mozjpeg / libjpeg-turbo   BSD-3-Clause / IJG (permissive)
+  - PNG  (lossless)    : oxipng / zlib             MIT / Apache-2.0 / zlib (permissive)
+
+No GPL- or AGPL-licensed code is used. AGPL-licensed engines such as MuPDF and
+Ghostscript were deliberately avoided so that wise pdf stays cleanly MIT and can
+be freely redistributed. All code paths used by wise pdf are therefore under
+permissive (MIT / Apache-2.0 / BSD / zlib) terms compatible with the MIT license
+of this project.
+
+Because these libraries are consumed as dependencies (not redistributed within
+this repository), no additional redistribution obligations are imposed by this
+project.

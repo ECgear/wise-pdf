@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>wise pdf — ブラウザ内でPDFを圧縮・変換（アップロード不要）</title>
+    <meta
+      name="description"
+      content="アップロード不要。PDFの圧縮・PDF→JPG・画像→PDFをブラウザ内だけで。ファイルはサーバーに送られません。"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <h1>wise pdf</h1>
+        <p class="lead">
+          アップロード不要。PDFの<strong>圧縮</strong>・<strong>PDF→JPG</strong>・<strong>画像→PDF</strong>を、
+          すべて<strong>あなたのブラウザの中だけ</strong>で行います。
+        </p>
+        <p class="callout privacy">
+          🔒 ファイルは<strong>あなたの端末から出ません</strong>。サーバーへの送信・保存は一切ありません。
+        </p>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="ツール">
+        <button class="tab" role="tab" data-tab="compress" aria-selected="true">PDFを圧縮</button>
+        <button class="tab" role="tab" data-tab="pdf2jpg" aria-selected="false">PDF → JPG</button>
+        <button class="tab" role="tab" data-tab="img2pdf" aria-selected="false">画像 → PDF</button>
+      </div>
+
+      <!-- ============ 圧縮 ============ -->
+      <section class="panel" data-panel="compress">
+        <h2 class="step"><span class="num">1</span>圧縮レベルを選ぶ</h2>
+        <div class="seg" role="group" aria-label="圧縮レベル" id="lvl-seg">
+          <button type="button" class="seg-btn" data-level="low" aria-pressed="false">
+            <span class="seg-title">軽め</span><span class="seg-sub">画質優先</span>
+          </button>
+          <button type="button" class="seg-btn" data-level="recommended" aria-pressed="true">
+            <span class="seg-title">おすすめ</span><span class="seg-sub">バランス</span>
+          </button>
+          <button type="button" class="seg-btn" data-level="maximum" aria-pressed="false">
+            <span class="seg-title">最大</span><span class="seg-sub">最小サイズ</span>
+          </button>
+        </div>
+        <p class="warn" id="max-warn" hidden>
+          ⚠ 「最大」は各ページを画像に変換します。<strong>文字のコピー・検索ができなくなります</strong>。
+        </p>
+
+        <h2 class="step"><span class="num">2</span>PDFをドラッグ&ドロップ</h2>
+        <div class="drop" id="c-drop" tabindex="0" role="button" aria-label="PDFをドロップまたは選択">
+          <div class="drop-ico" aria-hidden="true">📄</div>
+          <p class="drop-main">ここにPDFをドラッグ&ドロップ</p>
+          <p class="drop-sub">または</p>
+          <button type="button" class="btn" id="c-pick">ファイルを選択</button>
+          <p class="drop-note">PDFファイル・1ファイル / 最大 100MB</p>
+          <input id="c-file" type="file" accept="application/pdf" hidden />
+        </div>
+        <p class="status" id="c-status" hidden></p>
+        <p class="error" id="c-error" role="alert" hidden></p>
+        <div class="result" id="c-result" hidden></div>
+      </section>
+
+      <!-- ============ PDF → JPG ============ -->
+      <section class="panel" data-panel="pdf2jpg" hidden>
+        <h2 class="step"><span class="num">1</span>画質（解像度）を選ぶ</h2>
+        <div class="seg" role="group" aria-label="解像度" id="dpi-seg">
+          <button type="button" class="seg-btn" data-dpi="100" aria-pressed="false">
+            <span class="seg-title">低</span><span class="seg-sub">100dpi</span>
+          </button>
+          <button type="button" class="seg-btn" data-dpi="150" aria-pressed="true">
+            <span class="seg-title">標準</span><span class="seg-sub">150dpi</span>
+          </button>
+          <button type="button" class="seg-btn" data-dpi="220" aria-pressed="false">
+            <span class="seg-title">高</span><span class="seg-sub">220dpi</span>
+          </button>
+        </div>
+
+        <h2 class="step"><span class="num">2</span>PDFをドラッグ&ドロップ</h2>
+        <div class="drop" id="j-drop" tabindex="0" role="button" aria-label="PDFをドロップまたは選択">
+          <div class="drop-ico" aria-hidden="true">🖼️</div>
+          <p class="drop-main">ここにPDFをドラッグ&ドロップ</p>
+          <p class="drop-sub">または</p>
+          <button type="button" class="btn" id="j-pick">ファイルを選択</button>
+          <p class="drop-note">各ページをJPG画像にして、まとめてZIPで保存します</p>
+          <input id="j-file" type="file" accept="application/pdf" hidden />
+        </div>
+        <p class="status" id="j-status" hidden></p>
+        <p class="error" id="j-error" role="alert" hidden></p>
+        <div class="result" id="j-result" hidden></div>
+      </section>
+
+      <!-- ============ 画像 → PDF ============ -->
+      <section class="panel" data-panel="img2pdf" hidden>
+        <h2 class="step"><span class="num">1</span>ページサイズを選ぶ</h2>
+        <div class="seg" role="group" aria-label="ページサイズ" id="size-seg">
+          <button type="button" class="seg-btn" data-size="fit" aria-pressed="true">
+            <span class="seg-title">画像に合わせる</span><span class="seg-sub">余白なし</span>
+          </button>
+          <button type="button" class="seg-btn" data-size="a4" aria-pressed="false">
+            <span class="seg-title">A4</span><span class="seg-sub">中央配置</span>
+          </button>
+          <button type="button" class="seg-btn" data-size="letter" aria-pressed="false">
+            <span class="seg-title">Letter</span><span class="seg-sub">中央配置</span>
+          </button>
+        </div>
+
+        <h2 class="step"><span class="num">2</span>画像をドラッグ&ドロップ（複数可）</h2>
+        <div class="drop" id="i-drop" tabindex="0" role="button" aria-label="画像をドロップまたは選択">
+          <div class="drop-ico" aria-hidden="true">📎</div>
+          <p class="drop-main">ここに画像をドラッグ&ドロップ</p>
+          <p class="drop-sub">または</p>
+          <button type="button" class="btn" id="i-pick">ファイルを選択</button>
+          <p class="drop-note">JPEG / PNG / WebP / GIF など・選んだ順にページになります</p>
+          <input id="i-file" type="file" accept="image/*" multiple hidden />
+        </div>
+        <p class="status" id="i-status" hidden></p>
+        <p class="error" id="i-error" role="alert" hidden></p>
+        <div class="result" id="i-result" hidden></div>
+      </section>
+
+      <footer class="foot">
+        <p>
+          このツールはオープンソースです（MIT）。圧縮には
+          <a href="https://github.com/ECgear/wise-pdf" target="_blank" rel="noopener">wise pdf</a>
+          のエンジン（pdf.js / pdf-lib / mozjpeg）をブラウザ内で動かしています。
+        </p>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

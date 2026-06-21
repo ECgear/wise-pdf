@@ -1,0 +1,85 @@
+{
+  "name": "@ecgear/wise-pdf",
+  "version": "0.1.0",
+  "description": "Privacy-first, in-browser PDF toolkit — compress PDFs in 3 levels, convert PDF pages to JPG, and combine images into a PDF. 100% client-side (no upload), no GPL/AGPL code.",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./worker": {
+      "import": "./dist/worker.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "vite",
+    "build:demo": "vite build",
+    "preview": "vite preview",
+    "pretest": "npm run build",
+    "test": "node --test",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "preflight": "node scripts/preflight.mjs",
+    "prepack": "npm run build",
+    "prepare": "git config core.hooksPath .githooks || true"
+  },
+  "keywords": [
+    "pdf",
+    "pdf-compressor",
+    "compress-pdf",
+    "pdf-compression",
+    "pdf-to-jpg",
+    "jpg-to-pdf",
+    "image-to-pdf",
+    "client-side",
+    "in-browser",
+    "browser",
+    "privacy",
+    "no-upload",
+    "webassembly",
+    "wasm",
+    "pdfjs",
+    "pdf-lib",
+    "mozjpeg"
+  ],
+  "author": "ECgear",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ECgear/wise-pdf.git"
+  },
+  "homepage": "https://github.com/ECgear/wise-pdf#readme",
+  "bugs": {
+    "url": "https://github.com/ECgear/wise-pdf/issues"
+  },
+  "dependencies": {
+    "@jsquash/jpeg": "^1.6.0",
+    "@jsquash/oxipng": "^2.3.0",
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}
