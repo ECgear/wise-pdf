@@ -1,9 +1,9 @@
 # Rename to .gitignore
 
-# Dependencies / build
+# Dependencies / build (anchored to repo root so source dirs like src/build/ are kept)
 node_modules/
-dist/
-build/
+/dist/
+/build/
 coverage/
 *.tsbuildinfo
 
