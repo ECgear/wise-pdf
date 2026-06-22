@@ -37,3 +37,6 @@ playwright-report/
 
 # Demo build
 demo/dist/
+
+# Session handover notes (never commit, any location)
+HANDOVER.md
