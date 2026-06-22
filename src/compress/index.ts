@@ -27,6 +27,10 @@ export async function compress(
 ): Promise<CompressOutput> {
   const lp = levelParams(params.level);
   const originalSize = input.byteLength;
+  // The rasterize path hands `input` to pdf.js, which transfers (and detaches)
+  // its ArrayBuffer. Keep an intact copy for the "never enlarge" fallback below.
+  // recompress (pdf-lib) copies internally and leaves `input` usable.
+  const original = lp.strategy === 'rasterize' ? input.slice() : input;
 
   const result =
     lp.strategy === 'rasterize'
@@ -44,19 +48,26 @@ export async function compress(
         );
 
   let bytes = result.bytes;
+  let textPreserved = lp.textPreserved;
   const notes = [...result.notes];
 
-  // On the text-preserving levels, never hand back something larger than the input.
-  if (lp.strategy === 'recompress' && bytes.byteLength >= originalSize) {
-    bytes = input;
-    notes.push('元のPDFの方が小さいため、そのまま返しました');
+  // Never hand back something larger than the input. This matters most on
+  // `maximum`, where rasterizing an already-compact text PDF can *grow* it —
+  // returning the original also keeps its selectable text and vector content.
+  if (bytes.byteLength >= originalSize) {
+    bytes = original;
+    textPreserved = true;
+    // Drop notes about the discarded (larger) result — e.g. the rasterize note
+    // would wrongly claim the text was flattened when we kept the original.
+    notes.length = 0;
+    notes.push('元のPDFより小さくできなかったため、そのまま返しました');
   }
 
   return {
     bytes,
     originalSize,
     newSize: bytes.byteLength,
-    textPreserved: lp.textPreserved,
+    textPreserved,
     pages: result.pages,
     notes,
   };

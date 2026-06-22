@@ -70,6 +70,18 @@ Because the entire page becomes a JPEG, text is no longer selectable or searchab
 
 ---
 
+## Rendering inside the Web Worker (no `document`)
+
+`PDF → JPG` and `maximum` compression both rasterize pages with **pdf.js**, and all of it runs inside the engine Web Worker — where `document` does not exist. pdf.js's default factories assume a DOM, so any page that needs an intermediate canvas (transparency groups, soft masks, tiling patterns, Type3 glyphs) or installs a font face would otherwise throw `Cannot read properties of undefined (reading 'createElement')`. `loadDocument` in `src/render/pdfjs.ts` configures `getDocument` for headless rendering:
+
+- **`CanvasFactory`** — a small `OffscreenCanvasFactory` that allocates scratch canvases with `new OffscreenCanvas(...)` instead of `document.createElement('canvas')`.
+- **`FilterFactory`** — a no-op factory (same behavior as pdf.js's `NodeFilterFactory`); SVG/CSS filter effects for soft masks and blends are skipped rather than crashing the worker.
+- **`disableFontFace: true` + `useSystemFonts: false`** — glyphs are painted as vector outlines instead of being registered as CSS `@font-face`s, avoiding the `document`-dependent font loader. Embedded/subsetted fonts (the norm for modern PDFs) render exactly.
+
+Trivial image-only PDFs never hit these paths, so they rendered even with the old defaults — which is why the crash only surfaced on real text- or mask-heavy documents. The e2e suite (`e2e/smoke.spec.ts`) now includes a multi-page text + soft-mask PDF to guard against regression.
+
+---
+
 ## Compression level parameters
 
 | Level | DPI cap | JPEG quality | Text preserved | Notes |
@@ -118,3 +130,4 @@ All processing runs inside the injected Worker. The main thread communicates wit
 - Large PDFs on mobile devices can exceed browser memory limits, particularly during rasterization.
 - pdf-lib is currently unmaintained upstream. Its use is isolated to `src/compress/recompress-images.ts` and `src/build/`, so the dependency can be swapped without changing the public API.
 - Password-protected PDFs are not supported; the engine does not attempt decryption.
+- Worker-side rendering draws glyphs as vector paths (`disableFontFace`). Embedded or subsetted fonts render exactly, but PDFs that reference non-embedded base-14 fonts — or need external CMaps for some CJK encodings — are not yet given `standardFontDataUrl` / `cMapUrl`, so those glyphs fall back to pdf.js substitutes. Soft-mask and blend *filter* effects are also skipped (no-op filter factory) to keep rendering free of any `document` dependency. Wiring same-origin standard-font/CMap assets is a candidate for a future version.
