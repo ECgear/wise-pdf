@@ -28,8 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   filter factory (matching pdf.js's `NodeFilterFactory`), and glyph-path text via
   `disableFontFace`. Trivial image-only PDFs never exercised those paths, which
   is why earlier tests passed; the e2e suite now covers a text + soft-mask PDF.
-- **Compression never returns a file larger than the input.** The "never
-  enlarge" guard now also covers `maximum`: rasterizing an already-compact
-  text PDF can grow it, so when no level can shrink a PDF the engine returns the
-  original (keeping its selectable text) with an explanatory note, instead of a
-  larger, text-flattened result.
+- **`maximum` always produces a smaller, fully-rasterized PDF.** Rasterizing an
+  already-compact text/vector PDF at a fixed DPI can *grow* it. `maximum` now
+  lowers the render DPI automatically (down to a floor) until the output is
+  smaller than the input, so it reliably yields the smallest result with the text
+  flattened to image — matching the "smallest size / text no longer searchable"
+  label. `low` / `recommended` still keep selectable text and fall back to the
+  original untouched when recompression can't shrink the file.

@@ -64,7 +64,9 @@ Because only pixel data inside image objects is modified, the output PDF retains
 
 #### `maximum` — full-page rasterization (text becomes part of the image)
 
-Each page is rendered by **pdf.js** to an `OffscreenCanvas` at 120 DPI (the `maximum` DPI cap). The resulting bitmap is re-encoded by **mozjpeg** at quality 60. A new single-page PDF is constructed by **pdf-lib** containing only that JPEG image scaled to the original page dimensions. All pages are merged into one output document.
+Each page is rendered by **pdf.js** to an `OffscreenCanvas`, re-encoded by **mozjpeg** at quality 60, and assembled by **pdf-lib** into a one-image-per-page PDF.
+
+Rendering starts at 120 DPI (the `maximum` DPI cap). Because an already-compact text/vector PDF can *grow* when rasterized at a fixed DPI, the engine measures the result and, if it is not smaller than the input, lowers the DPI and re-renders — repeating until the output is smaller than the input or a 50 DPI floor is reached. `targetRasterDpi` (`src/compress/raster-dpi.ts`) derives each step from the measured size ratio, so it usually converges in one extra pass. This keeps `maximum` the smallest level instead of occasionally producing a larger file (at the cost of lower resolution and a second rasterization pass on such PDFs).
 
 Because the entire page becomes a JPEG, text is no longer selectable or searchable in the output.
 
@@ -88,7 +90,7 @@ Trivial image-only PDFs never hit these paths, so they rendered even with the ol
 |---|---|---|---|---|
 | `low` | 200 dpi | 82 | Yes | Mild re-encode only; quality-first |
 | `recommended` | 150 dpi | 72 | Yes | Default; balanced size/quality |
-| `maximum` | 120 dpi | 60 | **No** | Full rasterization; smallest output |
+| `maximum` | 120 dpi (lowered adaptively, floor 50) | 60 | **No** | Full rasterization; always smaller than the input |
 
 These values are the single source of truth in the codebase at `src/compress/levels.ts`.
 

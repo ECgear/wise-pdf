@@ -29,6 +29,8 @@ export { resolvePageSize, fitRect, PAGE_DIMENSIONS_PT, PT_PER_INCH } from './bui
 export type { Rect } from './build/page-sizes';
 export { estimateCompressedSize } from './util/estimate';
 export type { EstimateInput } from './util/estimate';
+export { targetRasterDpi } from './compress/raster-dpi';
+export type { RasterDpiOptions } from './compress/raster-dpi';
 
 export type {
   WisePdf,

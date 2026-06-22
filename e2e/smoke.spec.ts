@@ -176,7 +176,8 @@ test('text & soft-mask PDF renders in the worker (regression: createElement)', a
     return {
       maxPages: max.pages,
       maxTextPreserved: max.textPreserved,
-      maxHasBytes: max.newSize > 0,
+      maxOriginalSize: max.originalSize,
+      maxNewSize: max.newSize,
       jpgCount: jpgs.length,
       jpgType: jpgs[0]?.blob.type,
       jpgWidth: jpgs[0]?.width ?? 0,
@@ -185,9 +186,12 @@ test('text & soft-mask PDF renders in the worker (regression: createElement)', a
   }, pdfBytes);
 
   expect(result.maxPages).toBe(3);
-  // textPreserved is intentionally not asserted: the "never enlarge" guard may
-  // return the original (text kept) when rasterizing wouldn't shrink this PDF.
-  expect(result.maxHasBytes).toBe(true);
+  // maximum must never enlarge, and when it shrinks it must have rasterized
+  // (dropped the selectable text layer). This PDF does shrink under maximum.
+  expect(result.maxNewSize).toBeGreaterThan(0);
+  expect(result.maxNewSize).toBeLessThanOrEqual(result.maxOriginalSize);
+  expect(result.maxNewSize).toBeLessThan(result.maxOriginalSize);
+  expect(result.maxTextPreserved).toBe(false);
   expect(result.jpgCount).toBe(3);
   expect(result.jpgType).toBe('image/jpeg');
   expect(result.jpgWidth).toBeGreaterThan(0);
